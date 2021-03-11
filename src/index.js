@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4, validate } = require('uuid');
 
 const app = express();
 
@@ -91,16 +91,18 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-	const { username } = request.headers;
+	const { user } = request;
 	const { id } = request.params;
-
-	const user = users.find((user) => user.username === username);
 
 	const todo = user.todos.find((todo) => todo.id === id);
 
+	if(!todo) {
+		return response.status(404).json({ error: "Todo not found!" })
+	};
+
 	todo.done = true;
 
-	return response.json(todo).send()
+	return response.json(todo);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
